@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+</head>
+<body>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+<script>
+    // Criando uma instância do cliente SockJS
+    const socket = new SockJS('http://localhost:8080/websocket');
+
+    // Criando uma instância do cliente STOMP
+    const stompClient = Stomp.over(socket);
+
+    // Conectando ao servidor WebSocket
+    stompClient.connect({}, function (frame) {
+        console.log('WebSocket connected:', frame);
+
+        // Assinando o tópico "/topic/notifications"
+        stompClient.subscribe('/topic/notifications', function (message) {
+            const notification = JSON.parse(message.body);
+            console.log('Received Notification:', notification);
+        });
+    });
+
+    // Função para enviar uma notificação
+    function sendNotification() {
+        const notification = {
+            message: 'Hello, WebSocket!'
+        };
+
+        // Enviando a notificação para o destino "/app/notify"
+        stompClient.send('/app/notify', {}, JSON.stringify(notification));
+    }
+</script>
+
+<button onclick="sendNotification()">Enviar Notificação</button>
+
+</body>
+</html>
